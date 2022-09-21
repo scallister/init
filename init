@@ -7,7 +7,7 @@ ssh_config_path="${HOME}/.ssh/config"
 public_key_url="https://github.com/${github_user}.keys"
 public_ssh_path="${HOME}/.ssh/id_rsa_personal.pub"
 private_ssh_path="${HOME}/.ssh/id_rsa_personal"
-dotfile_repo_path=${HOME}/src/scallister/dotfiles
+dotfile_repo_path="${HOME}/src/scallister/dotfiles"
 
 mkdir -p ${ssh_dir_path}
 chmod 700 ${ssh_dir_path}
@@ -23,22 +23,40 @@ chmod 755 ${ssh_config_path}
 function get_ssh_keys {
 echo
 echo "Downloading public ssh key from ${public_key_url}"
-curl ${public_key_url} > ${public_ssh_path}
+curl --silent ${public_key_url} > ${public_ssh_path}
 chmod 644 ${public_ssh_path}
-
 echo
-echo
-touch ${private_ssh_path}
-chmod 600 ${private_ssh_path}
 
-echo Paste the private key and press ctrl-d:
-cat > ${private_ssh_path}
-
+# Create private SSH key if we need to
+if [[ ! -s ${private_ssh_path} ]]; then
+  touch -a ${private_ssh_path}
+  chmod 600 ${private_ssh_path}
+  echo "${private_ssh_path} is empty" 
+  echo Paste private key into vim:
+  sleep 2
+  vim ${private_ssh_path}
+fi
 }
 
 function clone_dotfiles {
-  mkdir -p ${HOME}/src/${github_user}
-  git clone git@github.com:${github_user}/dotfiles.git ${dotfile_repo_path}
+  if [[ ! -d ${dotfile_repo_path} ]]; then
+    mkdir -p ${HOME}/src/${github_user}
+    git clone git@github.com:${github_user}/dotfiles.git ${dotfile_repo_path}
+  fi
+}
+
+function box_out()
+{
+  local s="$*"
+  tput setaf 3
+  echo " -${s//?/-}-
+| ${s//?/ } |
+| $(tput setaf 4)$s$(tput setaf 3) |
+| ${s//?/ } |
+ -${s//?/-}-"
+  tput sgr 0
 }
 
 get_ssh_keys && clone_dotfiles
+
+box_out "Initialized and ready to run setup in ${HOME}/src/${github_user}"
