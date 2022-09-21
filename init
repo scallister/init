@@ -1,0 +1,44 @@
+#!/bin/bash
+set -e
+
+github_user="scallister"
+ssh_dir_path="${HOME}/.ssh"
+ssh_config_path="${HOME}/.ssh/config"
+public_key_url="https://github.com/${github_user}.keys"
+public_ssh_path="${HOME}/.ssh/id_rsa_personal.pub"
+private_ssh_path="${HOME}/.ssh/id_rsa_personal"
+dotfile_repo_path=${HOME}/src/scallister/dotfiles
+
+mkdir -p ${ssh_dir_path}
+chmod 700 ${ssh_dir_path}
+echo "
+# GitLab.com server
+# The key fingerprint is: bd:3a:a8:ea:87:14:ca:4e:3c:5d:1e:83:05:e7:05:cd 
+Host gitlab.com github.com
+PubkeyAuthentication yes
+identityfile ~/.ssh/id_rsa_personal
+" >> ${ssh_config_path}
+chmod 755 ${ssh_config_path}
+
+function get_ssh_keys {
+echo
+echo "Downloading public ssh key from ${public_key_url}"
+curl ${public_key_url} > ${public_ssh_path}
+chmod 644 ${public_ssh_path}
+
+echo
+echo
+touch ${private_ssh_path}
+chmod 600 ${private_ssh_path}
+
+echo Paste the private key and press ctrl-d:
+cat > ${private_ssh_path}
+
+}
+
+function clone_dotfiles {
+  mkdir -p ${HOME}/src/${github_user}
+  git clone git@github.com:${github_user}/dotfiles.git ${dotfile_repo_path}
+}
+
+get_ssh_keys && clone_dotfiles
