@@ -9,16 +9,18 @@ public_ssh_path="${HOME}/.ssh/id_rsa_personal.pub"
 private_ssh_path="${HOME}/.ssh/id_rsa_personal"
 dotfile_repo_path="${HOME}/src/scallister/dotfiles"
 
-mkdir -p ${ssh_dir_path}
-chmod 700 ${ssh_dir_path}
-echo "
+if [[ ! -s ${ssh_config_path} ]]; then
+  mkdir -p ${ssh_dir_path}
+  chmod 700 ${ssh_dir_path}
+  echo "
 # GitLab.com server
 # The key fingerprint is: bd:3a:a8:ea:87:14:ca:4e:3c:5d:1e:83:05:e7:05:cd 
-Host gitlab.com github.com
+Host gitlab.com github.com .ninja
 PubkeyAuthentication yes
 identityfile ~/.ssh/id_rsa_personal
-" >> ${ssh_config_path}
-chmod 755 ${ssh_config_path}
+" > ${ssh_config_path}
+  chmod 755 ${ssh_config_path}
+fi
 
 function get_ssh_keys {
 echo
