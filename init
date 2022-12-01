@@ -38,6 +38,7 @@ if [[ ! -s ${private_ssh_path} ]]; then
   sleep 2
   vim ${private_ssh_path}
 fi
+ssh-add ${private_ssh_path}
 }
 
 function clone_dotfiles {
