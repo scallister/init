@@ -15,7 +15,7 @@ if [[ ! -s ${ssh_config_path} ]]; then
   echo "
 # GitLab.com server
 # The key fingerprint is: bd:3a:a8:ea:87:14:ca:4e:3c:5d:1e:83:05:e7:05:cd 
-Host gitlab.com github.com .ninja
+Host gitlab.com github.com .ninja *
 PubkeyAuthentication yes
 identityfile ~/.ssh/id_rsa_personal
 " > ${ssh_config_path}
