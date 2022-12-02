@@ -8,6 +8,7 @@ public_key_url="https://github.com/${github_user}.keys"
 public_ssh_path="${HOME}/.ssh/id_rsa_personal.pub"
 private_ssh_path="${HOME}/.ssh/id_rsa_personal"
 dotfile_repo_path="${HOME}/src/scallister/dotfiles"
+personal_dotfile_repo_path="${HOME}/src/scallister/dotfiles_personal"
 
 if [[ ! -s ${ssh_config_path} ]]; then
   mkdir -p ${ssh_dir_path}
@@ -43,9 +44,12 @@ ssh-add ${private_ssh_path}
 }
 
 function clone_dotfiles {
+  mkdir -p ${HOME}/src/${github_user}
   if [[ ! -d ${dotfile_repo_path} ]]; then
-    mkdir -p ${HOME}/src/${github_user}
     git clone git@github.com:${github_user}/dotfiles.git ${dotfile_repo_path}
+  fi
+  if [[ ! -d ${personal_dotfile_repo_path} ]] && hostname | grep -i "ninja$" > /dev/null; then
+    git clone git@github.com:${github_user}/dotfiles_personal.git ${personal_dotfile_repo_path}
   fi
 }
 
