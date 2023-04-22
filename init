@@ -1,14 +1,18 @@
 #!/bin/bash
 set -e
 
+# User setup
 github_user="scallister"
 ssh_dir_path="${HOME}/.ssh"
 ssh_config_path="${HOME}/.ssh/config"
 public_key_url="https://github.com/${github_user}.keys"
 public_ssh_path="${HOME}/.ssh/id_rsa_personal.pub"
 private_ssh_path="${HOME}/.ssh/id_rsa_personal"
-dotfile_repo_path="${HOME}/src/scallister/dotfiles"
-personal_dotfile_repo_path="${HOME}/src/scallister/dotfiles_personal"
+# Repo paths
+src_path="${HOME}/src/scallister"
+init_repo_path="${src_path}/init"
+dotfile_repo_path="${src_path}/dotfiles"
+personal_dotfile_repo_path="${src_path}/dotfiles_personal"
 
 if [[ ! -s ${ssh_config_path} ]]; then
   mkdir -p ${ssh_dir_path}
@@ -45,6 +49,9 @@ ssh-add ${private_ssh_path}
 
 function clone_dotfiles {
   mkdir -p ${HOME}/src/${github_user}
+  if [[ ! -d ${init_repo_path} ]]; then
+    git clone git@github.com:${github_user}/init.git ${init_repo_path}
+  fi
   if [[ ! -d ${dotfile_repo_path} ]]; then
     git clone git@github.com:${github_user}/dotfiles.git ${dotfile_repo_path}
   fi
