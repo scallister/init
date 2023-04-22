@@ -14,6 +14,18 @@ init_repo_path="${src_path}/init"
 dotfile_repo_path="${src_path}/dotfiles"
 personal_dotfile_repo_path="${src_path}/dotfiles_personal"
 
+function box_out()
+{
+  local s="$*"
+  tput setaf 3
+  echo " -${s//?/-}-
+| ${s//?/ } |
+| $(tput setaf 4)$s$(tput setaf 3) |
+| ${s//?/ } |
+ -${s//?/-}-"
+  tput sgr 0
+}
+
 if [[ ! -s ${ssh_config_path} ]]; then
   mkdir -p ${ssh_dir_path}
   chmod 700 ${ssh_dir_path}
@@ -43,8 +55,26 @@ if [[ ! -s ${private_ssh_path} ]]; then
   sleep 2
   vim ${private_ssh_path}
 fi
-eval `ssh-agent -s`
-ssh-add ${private_ssh_path}
+
+
+# Ensure agent is running
+ssh-add -l &>/dev/null
+if [ "$?" == 2 ]; then
+    # Could not open a connection to your authentication agent.
+
+    # Load stored agent connection info.
+    test -r ~/.ssh-agent && \
+        eval "$(<~/.ssh-agent)" >/dev/null
+
+    ssh-add -l &>/dev/null
+    if [ "$?" == 2 ]; then
+        # Start agent and store agent connection info.
+        (umask 066; ssh-agent > ~/.ssh-agent)
+        eval "$(<~/.ssh-agent)" >/dev/null
+    fi
+fi
+# Load key if needed
+ssh-add -l | grep -i id_rsa || ssh-add ${private_ssh_path}
 }
 
 function clone_dotfiles {
@@ -59,23 +89,29 @@ function clone_dotfiles {
     git clone git@github.com:${github_user}/dotfiles_personal.git ${personal_dotfile_repo_path}
   else
     echo "Skipping dotfiles_personal, hostname does not end in ninja"
+    echo ""
     echo "To clone dotfiles_personal still, run:"
     echo "git clone git@github.com:scallister/dotfiles_personal.git ${personal_dotfile_repo_path}"
   fi
 }
 
-function box_out()
-{
-  local s="$*"
-  tput setaf 3
-  echo " -${s//?/-}-
-| ${s//?/ } |
-| $(tput setaf 4)$s$(tput setaf 3) |
-| ${s//?/ } |
- -${s//?/-}-"
-  tput sgr 0
+function link_dotfile_install_scripts {
+    mkdir -p ${HOME}/bin
+    if [ ! -h ${HOME}/bin/dotfile_install.sh ]
+    then
+        echo 'Linking dotfile_install.sh in ~/bin'
+        ln -s ${init_repo_path}/scripts/dotfile_install.sh ${HOME}/bin/dotfile_install.sh
+    fi
+    if [ ! -h ${HOME}/bin/dotfile_uninstall.sh ]
+    then
+        echo 'Linking dotfile_uninstall.sh in ~/bin'
+        ln -s ${init_repo_path}/scripts/dotfile_uninstall.sh ${HOME}/bin/dotfile_uninstall.sh
+    fi
 }
 
-get_ssh_keys && clone_dotfiles
+
+get_ssh_keys &&
+clone_dotfiles &&
+link_dotfile_install_scripts
 
 box_out "Initialized and ready to run setup in ${HOME}/src/${github_user}"
