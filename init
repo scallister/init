@@ -85,7 +85,7 @@ function clone_dotfiles {
   if [[ ! -d ${dotfile_repo_path} ]]; then
     git clone git@github.com:${github_user}/dotfiles.git ${dotfile_repo_path}
   fi
-  if [[ ! -d ${personal_dotfile_repo_path} ]] && hostname | grep -i "ninja$" > /dev/null; then
+  if [[ ! -d ${personal_dotfile_repo_path} ]] && hostname | grep -i "ninja$\|penguin$" > /dev/null; then
     git clone git@github.com:${github_user}/dotfiles_personal.git ${personal_dotfile_repo_path}
   else
     echo "Skipping dotfiles_personal, hostname does not end in ninja"
